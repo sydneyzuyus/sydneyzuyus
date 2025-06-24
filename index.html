@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Mark Screensaver</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: #000;
+            overflow: hidden;
+        }
+        img#logo {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+    </style>
+</head>
+<body>
+    <img id="logo" src="" alt="Word Mark">
+    <script>
+        (function() {
+            const images = [
+                "https://nosingleindividual.com/wp-content/uploads/2025/06/flamingo-Word-Mark.png",
+                "https://nosingleindividual.com/wp-content/uploads/2025/06/Lavender-Word-Mark.png",
+                "https://nosingleindividual.com/wp-content/uploads/2025/06/Lime-Word-Mark.png",
+                "https://nosingleindividual.com/wp-content/uploads/2025/06/raspberry-Word-Mark.png"
+            ];
+            let current = 0;
+            const img = document.getElementById('logo');
+            img.src = images[current];
+
+            // starting position in the center
+            let x = (window.innerWidth - img.width) / 2;
+            let y = (window.innerHeight - img.height) / 2;
+
+            // movement speed (pixels per frame)
+            let dx = 2;
+            let dy = 2;
+
+            function changeImage() {
+                const prev = current;
+                // Choose next image sequentially
+                current = (current + 1) % images.length;
+                img.src = images[current];
+            }
+
+            function move() {
+                x += dx;
+                y += dy;
+
+                // Check horizontal bounds
+                if (x <= 0 || x + img.width >= window.innerWidth) {
+                    dx *= -1;
+                    changeImage();
+                }
+                // Check vertical bounds
+                if (y <= 0 || y + img.height >= window.innerHeight) {
+                    dy *= -1;
+                    changeImage();
+                }
+
+                img.style.left = x + 'px';
+                img.style.top = y + 'px';
+                requestAnimationFrame(move);
+            }
+
+            // ensure the image has loaded to get dimensions
+            img.onload = function() {
+                x = (window.innerWidth - img.width) / 2;
+                y = (window.innerHeight - img.height) / 2;
+                img.style.left = x + 'px';
+                img.style.top = y + 'px';
+                requestAnimationFrame(move);
+            };
+        })();
+    </script>
+</body>
+</html>
