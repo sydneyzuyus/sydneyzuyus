@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Retro Desktop</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Anonymous+Pro&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Tiny5&display=swap" rel="stylesheet">
+  <style>
+    /* Layout and popup styles */
+    body{background-color:#008080;margin:0;padding:0;font-family:'Anonymous Pro',monospace;}
+    .desktop-container{position:fixed;top:50%;left:0;transform:translateY(-50%);display:flex;flex-direction:column;align-items:flex-start;}
+    .desktop-container>div{margin:10px;}
+    .about98-icon{display:inline-flex;align-items:center;justify-content:center;width:128px;height:128px;margin:20px;cursor:pointer;}
+    .about98-icon img{width:96px;height:96px;}
+    .about98-window{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:90%;max-width:700px;min-width:300px;min-height:200px;border:2px solid #000;background:#fff;box-shadow:5px 5px 0 #000;resize:both;overflow:hidden;z-index:999;display:none;flex-direction:column;}
+    .about98-title-bar{background:#2d1198;color:#fff;display:flex;align-items:center;padding:4px 10px;font-family:'Tiny5',sans-serif;font-size:20px;letter-spacing:2px;cursor:move;user-select:none;flex-shrink:0;}
+    .about98-title-bar img{width:18px;height:18px;margin-right:8px;}
+    .about98-close-button{margin-left:auto;background:#fff;color:#000;width:20px;height:20px;text-align:center;font-weight:bold;font-family:'Tiny5',sans-serif;border:1px solid #000;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+    .about98-close-button:hover{box-shadow:inset 1px 1px 2px #888;background:#e0e0e0;}
+    .about98-tabs{display:flex;padding-left:10px;border-bottom:2px solid #808080;flex-shrink:0;}
+    .about98-tab{padding:2px 8px;font-family:'Tiny5',sans-serif;font-size:14px;background:#C0C0C0;border:2px solid #808080;border-bottom:none;margin-right:2px;cursor:pointer;user-select:none;}
+    .about98-tab.active{background:#fff;border-color:#fff #808080 #808080 #fff;}
+    .about98-content{padding:20px 30px;font-size:16px;line-height:1.6;white-space:pre-line;overflow:auto;flex-grow:1;}
+    #tab-featured a{font-size:inherit;color:blue;text-decoration:underline;}
+    .about98-footer{background:#C0C0C0;border-top:2px solid #808080;padding:6px 10px;display:flex;justify-content:flex-end;align-items:center;flex-shrink:0;}
+    .about98-footer button{font-family:'Tiny5',sans-serif;font-size:14px;margin-left:8px;padding:0 8px;height:24px;line-height:22px;background:#C0C0C0;border:2px outset #fff;color:#000;cursor:pointer;user-select:none;flex-shrink:0;}
+    .about98-footer button:hover{border-style:inset;background:#c9c9c9;color:#000;}
+    .about98-footer button:active{border-style:inset;}
+    .profile-window .about98-content{display:flex;align-items:flex-start;white-space:normal;}
+    .profile-photo{border:2px solid #000;width:150px;height:150px;overflow:hidden;flex-shrink:0;display:flex;justify-content:center;align-items:center;}
+    .profile-photo img{width:100%;height:100%;object-fit:cover;object-position:center;}
+    .profile-details{padding-left:20px;}
+    .profile-details h1{font-family:'Tiny5',sans-serif;font-size:24px;margin:0;}
+    .profile-details h2{font-family:'Anonymous Pro',monospace;font-size:16px;text-transform:uppercase;margin:4px 0 0 0;}
+    .profile-details p{margin:4px 0;font-family:'Anonymous Pro',monospace;}
+    .leader-item{cursor:pointer;}
+    .leader-item .leader-name{color:blue;text-decoration:underline;}
+    .leader-item .leader-title{color:black;text-decoration:none;}
+    .prompt{display:block;margin:0 0 4px;font-family:'Tiny5',sans-serif;font-weight:bold;}
+    .testimonial-button{font-family:'Tiny5',sans-serif;font-size:14px;padding:0 8px;height:24px;line-height:22px;background:#C0C0C0;border:2px outset #fff;color:black;cursor:pointer;user-select:none;margin-right:8px;flex-shrink:0;}
+    .testimonial-window{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:95vw;height:90vh;min-width:300px;min-height:300px;border:2px solid #000;background:#fff;box-shadow:5px 5px 0 #000;resize:both;overflow:hidden;z-index:1000;display:none;}
+    @media (max-width:600px){.testimonial-window{width:98vw;height:85vh;left:50%;top:50%;transform:translate(-50%,-50%);}}
+    .testimonial-titlebar{background:#2d1198;color:#fff;display:flex;align-items:center;padding:4px 10px;font-family:'Tiny5',sans-serif;font-size:20px;letter-spacing:2px;cursor:move;user-select:none;height:32px;box-sizing:border-box;}
+    .testimonial-titlebar img{width:18px;height:18px;margin-right:8px;}
+    .testimonial-close{margin-left:auto;background:#fff;color:#000;width:20px;height:20px;text-align:center;font-weight:bold;font-family:'Tiny5',sans-serif;border:1px solid #000;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+    .testimonial-close:hover{box-shadow:inset 1px 1px 2px #888;background:#e0e0e0;}
+    .testimonial-content{position:absolute;top:32px;left:0;right:0;bottom:0;background:#000;overflow:hidden;}
+    .trail{position:absolute;pointer-events:none;box-sizing:border-box;z-index:1;transition:opacity 2s linear;}
+    #testimonial-block{position:absolute;width:80%;max-width:300px;padding:12px 14px;background-color:rgb(255,0,89);color:#000;font-family:"Anonymous Pro",monospace;border:2px outset #fff;box-sizing:border-box;user-select:none;z-index:2;}
+    #testimonial-block p{margin:0;}
+    #testimonial-block p.text{margin-bottom:8px;font-size:14px;line-height:1.4;}
+    #testimonial-block p.author{margin:8px 0 2px;font-family:"Tiny5",sans-serif;font-weight:bold;font-size:16px;}
+    #testimonial-block p.title{margin:0;font-family:"Tiny5",sans-serif;font-size:13px;font-style:italic;}
+    .teamModel-icon{display:inline-flex;align-items:center;justify-content:center;width:128px;height:128px;margin:20px;cursor:pointer;}
+    .teamModel-icon img{width:96px;height:96px;}
+    .teamModel-window{position:fixed;display:none;flex-direction:column;top:50%;left:50%;transform:translate(-50%,-50%);width:90%;max-width:700px;min-width:300px;border:2px solid #000;background:#fff;box-shadow:5px 5px 0 #000;resize:both;overflow:hidden;z-index:1000;}
+    .teamModel-title-bar{background:#2d1198;color:#fff;display:flex;align-items:center;padding:4px 10px;font-family:'Tiny5',sans-serif;font-size:20px;letter-spacing:2px;user-select:none;cursor:move;flex-shrink:0;}
+    .teamModel-title-bar img{width:18px;height:18px;margin-right:8px;}
+    .teamModel-close-button{margin-left:auto;background:#fff;color:#000;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-family:'Tiny5',sans-serif;font-size:16px;font-weight:bold;border:1px solid #000;cursor:pointer;}
+    .teamModel-close-button:hover{background:#e0e0e0;box-shadow:inset 1px 1px 2px #888;}
+    .teamModel-content{padding:20px 30px;font-size:16px;line-height:1.6;white-space:pre-line;overflow:auto;flex-grow:1;}
+    .video-window{position:fixed;display:none;flex-direction:column;top:50%;left:50%;transform:translate(-50%,-50%);width:80%;max-width:640px;background:#000;border:2px solid #000;box-shadow:5px 5px 0 #000;overflow:hidden;z-index:1001;}
+    .video-title-bar{background:#000;color:#fff;display:flex;align-items:center;padding:4px 10px;font-family:'Tiny5',sans-serif;font-size:16px;user-select:none;cursor:move;}
+    .video-title-bar .video-close-button{margin-left:auto;background:#333;color:#fff;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-family:'Tiny5',sans-serif;font-size:16px;font-weight:bold;border:1px solid #000;cursor:pointer;}
+    .video-title-bar .video-close-button:hover{background:#555;}
+    .video-content video{width:100%;height:auto;display:block;}
+    @media (max-width:600px){.teamModel-window{width:95%;}.teamModel-content{padding:15px 20px;font-size:14px;}.teamModel-title-bar{font-size:16px;}.video-window{width:95%;}.video-title-bar{font-size:14px;}}
+    .desktop-icon{display:inline-flex;align-items:center;justify-content:center;width:128px;height:128px;margin:20px;cursor:pointer;}
+    .desktop-icon img{width:96px;height:96px;}
+    .window{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:700px;height:500px;border:2px solid #000;background:#fff;box-shadow:5px 5px 0 #000;resize:both;overflow:hidden;z-index:999;display:none;flex-direction:column;}
+    .title-bar{background:#2d1198;color:#fff;display:flex;align-items:center;padding:4px 10px;font-family:'Tiny5',sans-serif;font-size:20px;letter-spacing:2px;cursor:move;user-select:none;}
+    .title-bar img{width:18px;height:18px;margin-right:8px;}
+    .title-bar .close-button{margin-left:auto;background:#fff;color:#000;width:20px;height:20px;border:1px solid #000;display:flex;align-items:center;justify-content:center;font-family:'Tiny5',sans-serif;font-weight:bold;cursor:pointer;}
+    .title-bar .close-button:hover{box-shadow:inset 1px 1px 2px #888;background:#e0e0e0;}
+    .toolbar,.address-bar{display:flex;align-items:center;background:#d4d0c8;border-bottom:1px solid #a0a0a0;font-size:14px;padding:4px 6px;gap:10px;}
+    .toolbar span{margin-right:10px;}
+    .address-bar input{flex-grow:1;margin-left:10px;height:24px;font-family:'Anonymous Pro',monospace;}
+    .icon-area{padding:20px;display:flex;gap:40px;flex-wrap:wrap;}
+    .folder-icon{display:flex;flex-direction:column;align-items:center;width:64px;text-align:center;font-size:14px;cursor:pointer;}
+    .folder-icon img{width:48px;height:48px;image-rendering:pixelated;}
+    .window-content{padding:20px;flex:1;overflow:auto;font-family:'Anonymous Pro',monospace;}
+    .account-header,.strategy-header{font-family:'Tiny5',sans-serif;font-size:12px;margin-top:0;margin-bottom:0.5em;}
+    .terminal-window{background:#000;color:#0f0;font-family:'Anonymous Pro',monospace;font-size:14px;padding:10px;overflow-y:auto;}
+    .terminal-window .title-bar{cursor:move;background:#2d1198;}
+    .terminal-window .title-bar .close-button:hover{background:#e0e0e0;}
+    .terminal-content{white-space:pre-wrap;flex:1;overflow-y:auto;}
+    .terminal-content::after{content:'_';animation:blink 1s steps(2) infinite;}
+    @keyframes blink{0%,50%{opacity:1;}51%,100{opacity:0;}}
+    #finishLoadingBtn{background:#f0f0f0;color:#000;border:1px solid #808080;font-family:'Tiny5',sans-serif;font-size:14px;padding:2px 8px;cursor:default;outline:none;}
+    #finishLoadingBtn:hover{border-style:inset;}
+    #finishLoadingBtn:active{border-style:inset;}
+    .nsiap-window{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:90%;max-width:700px;min-width:300px;min-height:300px;height:70vh;border:2px solid #000;background:#fff;box-shadow:5px 5px 0 #000;resize:both;overflow:hidden;z-index:1000;display:none;flex-direction:column;}
+    .nsiap-title-bar{background:#2d1198;color:#fff;display:flex;align-items:center;padding:4px 10px;font-family:'Tiny5',sans-serif;font-size:20px;letter-spacing:2px;cursor:move;user-select:none;}
+    .nsiap-close-button{margin-left:auto;background:#fff;color:#000;width:20px;height:20px;text-align:center;font-weight:bold;font-family:'Tiny5',sans-serif;border:1px solid #000;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+    .nsiap-close-button:hover{box-shadow:inset 1px 1px 2px #888;background:#e0e0e0;}
+    .nsiap-menu-bar{display:flex;align-items:center;background:#d4d0c8;border-bottom:1px solid #a0a0a0;font-size:14px;padding:4px 6px;gap:10px;font-family:'Anonymous Pro',monospace;color:black;user-select:none;cursor:default;}
+    .nsiap-menu-bar span{margin-right:10px;}
+    .nsiap-chat{flex:1;padding:10px 30px;overflow-y:auto;border-bottom:1px solid #a0a0a0;font-family:'Anonymous Pro',monospace;}
+    .nsiap-chat .message{margin:6px 0;}
+    .nsiap-chat .sender{font-weight:bold;}
+    .nsiap-chat .message.user .sender{color:red;}
+    .nsiap-chat .message.response .sender{color:blue;}
+    .nsiap-chat .typing-indicator{display:flex;align-items:center;margin:6px 0;font-style:italic;}
+    .nsiap-chat .typing-indicator .sender{font-weight:bold;color:blue;margin-right:8px;}
+    .nsiap-chat .typing-indicator .typing-text{display:inline-block;}
+    .nsiap-chat .typing-indicator .dots{margin-left:4px;width:1em;}
+    .nsiap-format-bar{background:#d4d0c8;padding:4px 30px;display:flex;gap:4px;border-bottom:1px solid #a0a0a0;}
+    .nsiap-format-bar button{width:24px;height:24px;border:1px solid #808080;background:#f0f0f0;font-size:12px;color:black;cursor:default;font-family:'Tiny5',sans-serif;}
+    .nsiap-format-bar button:hover{border-style:inset;background:#e0e0e0;color:black;}
+    .nsiap-input-area{padding:8px 30px;background:#fff;border-bottom:1px solid #a0a0a0;display:flex;flex-wrap:wrap;gap:6px;}
+    .nsiap-input-area button.option{font-family:'Tiny5',sans-serif;font-size:14px;padding:4px 8px;background:#f0f0f0;border:2px outset #fff;color:black;cursor:pointer;}
+    .nsiap-input-area button.option:hover,.nsiap-input-area button.option:active{border-style:inset;background:#e0e0e0;color:black;}
+    .nsiap-icon-bar{background:#d4d0c8;padding:4px 30px;display:flex;gap:12px;align-items:flex-end;}
+    .msn-icon{display:flex;flex-direction:column;align-items:center;justify-content:center;width:48px;height:48px;padding:2px;border:1px solid #808080;background:#f0f0f0;font-family:'Tiny5',sans-serif;font-size:10px;color:black;cursor:pointer;-webkit-tap-highlight-color:rgba(0,0,0,0);appearance:none;}
+    .msn-icon *{-webkit-tap-highlight-color:rgba(0,0,0,0);}
+    .msn-icon span{font-size:18px;line-height:18px;}
+    .msn-icon:hover{border-style:inset;background:#e0e0e0;color:black;}
+    .msn-icon:active{border-style:inset;background:#d0d0d0;color:black;outline:none;}
+    .msn-icon:focus,.msn-icon:focus-visible{outline:none;background:#e0e0e0;color:black;border-style:inset;}
+    .msn-disabled{background:#c0c0c0;color:#666;pointer-events:none;}
+    .emoji-picker{position:absolute;bottom:40px;left:0;background:#fff;border:1px solid #808080;display:none;padding:4px;gap:4px;font-size:20px;}
+    .emoji-picker span{cursor:pointer;}
+    @keyframes revealWalkDog{0%{bottom:-8%;left:-10%;}10%{bottom:0;left:-10%;}100%{bottom:0;left:calc(100% + 10%);}}
+    .walking-dog{position:absolute;bottom:-8%;left:-10%;height:8%;pointer-events:none;animation:revealWalkDog 5s linear forwards;}
+    .tetris-popup{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:300px;height:520px;background:#000;border:2px solid #000;display:none;flex-direction:column;z-index:1001;}
+    .tetris-popup canvas{flex:1;background:#111;}
+    .tetris-popup .close{background:#fff;border:1px solid #000;font-family:'Tiny5',sans-serif;font-size:12px;color:#000;font-weight:bold;cursor:pointer;padding:2px 6px;align-self:flex-end;}
+    @media (max-width:600px){.window,.nsiap-window{width:95%!important;height:90%!important;top:5%!important;left:2.5%!important;transform:none!important;}}
+    @media (max-width:600px){.nsiPaint-window{height:70vh!important;}.contact98-window{height:60vh!important;}}
+    .nsiPaint-icon{display:inline-flex;align-items:center;justify-content:center;width:128px;height:128px;margin:20px;cursor:pointer;}
+    .nsiPaint-icon img{width:96px;height:96px;}
+    .nsiPaint-window{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:800px;height:600px;border:2px solid #000;background:#c0c0c0;box-shadow:5px 5px 0 #000;resize:both;overflow:hidden;z-index:1000;display:none;flex-direction:column;}
+    .nsiPaint-titlebar{background:#000080;color:white;display:flex;align-items:center;padding:4px 10px;font-family:'Tiny5',sans-serif;font-size:20px;letter-spacing:2px;cursor:move;user-select:none;}
+    .nsiPaint-titlebar img{width:18px;height:18px;margin-right:8px;}
+    .nsiPaint-close{margin-left:auto;background:#fff;color:#000;width:20px;height:20px;text-align:center;font-weight:bold;font-family:'Tiny5',sans-serif;border:1px solid #000;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+    .nsiPaint-close:hover{box-shadow:inset 1px 1px 2px #888;background:#e0e0e0;}
+    .nsiPaint-main{flex-grow:1;position:relative;}
+    #nsiPaintCanvas{display:block;cursor:crosshair;background:#fff;}
+    .nsiPaint-colors{display:flex;flex-wrap:wrap;background:#d4d0c8;padding:5px;border-top:2px solid gray;}
+    .nsiPaint-color{width:20px;height:20px;margin:2px;border:1px solid #000;cursor:pointer;}
+    @media (max-width:600px){.nsiPaint-window{width:95%;height:70vh;}.nsiPaint-titlebar{font-size:16px;}}
+    .contact98-icon{display:inline-flex;align-items:center;justify-content:center;width:128px;height:128px;margin:20px;cursor:pointer;}
+    .contact98-icon img{width:96px;height:96px;}
+    .contact98-window{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:90%;max-width:700px;height:60vh;min-width:300px;min-height:200px;border:2px solid #000;background:#fff;box-shadow:5px 5px 0 #000;resize:both;overflow:auto;z-index:999;display:none;}
+    .contact98-titlebar{background:#2d1198;color:white;display:flex;align-items:center;padding:4px 10px;font-family:'Tiny5',sans-serif;font-size:20px;letter-spacing:2px;cursor:move;user-select:none;}
+    .contact98-titlebar img{width:18px;height:18px;margin-right:8px;}
+    .contact98-close{margin-left:auto;background:white;color:black;width:20px;height:20px;text-align:center;font-weight:bold;font-family:'Tiny5',sans-serif;border:1px solid black;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+    .contact98-close:hover{box-shadow:inset 1px 1px 2px #888;background:#e0e0e0;}
+    .contact98-content{padding:20px 30px;font-size:16px;line-height:1.6;white-space:pre-line;}
+    @media (max-width:600px){.contact98-window{width:95%;height:60vh;left:50%;transform:translate(-50%, -50%);} .contact98-content{padding:15px 20px;font-size:14px;} .contact98-titlebar{font-size:16px;}}
+    @media (max-width:600px){.about98-window{width:95%;height:90%;left:50%;top:50%;transform:translate(-50%, -50%);} .about98-title-bar{font-size:16px;} .about98-content{padding:15px 20px;font-size:14px;}}
+    @media (max-width:768px){.desktop-container{display:grid;grid-template-columns:repeat(2,auto);width:auto;justify-items:start;align-items:center;}.desktop-container>div{width:auto;}}
+    @media (max-height:950px){.desktop-container{top:80px;transform:none;height:calc(100vh - 80px);display:flex;flex-wrap:wrap;align-content:flex-start;}}
+  </style>
+</head>
+<body>
+  <!-- Desktop icons -->
+  <div class="desktop-container">
+    <div class="about98-icon" onclick="about98ShowWindow()">
+      <img src="https://nosingleindividual.com/wp-content/uploads/2025/06/About_Icon.png" alt="About Icon">
+    </div>
+    <div class="teamModel-icon" onclick="showTeamModel()">
+      <img src="https://nosingleindividual.com/wp-content/uploads/2025/06/Team_Model_Icon.png" alt="Team Model Icon">
+    </div>
+    <div class="desktop-icon" onclick="showServicesWindow()">
+      <img src="https://nosingleindividual.com/wp-content/uploads/2025/06/Services_Icon-1.png" alt="Services">
+    </div>
+    <div class="nsiPaint-icon" onclick="openPaintWindow()">
+      <img src="https://nosingleindividual.com/wp-content/uploads/2025/06/NSI_Paint_Icon.png" alt="NSI Paint Icon">
+    </div>
+    <div class="contact98-icon" onclick="openContact98Window()">
+      <img src="https://nosingleindividual.com/wp-content/uploads/2025/06/Contact_Icon.png" alt="Contact Icon">
+    </div>
+  </div>
+
+  <!-- About popup -->
+  <div class="about98-window" id="about98Window">
+    <div class="about98-title-bar" id="about98TitleBar">
+      <img src="https://nosingleindividual.com/staging/2963/wp-content/uploads/2025/05/About.png" alt="Info Icon">
+      ABOUT
+      <div class="about98-close-button" onclick="about98CloseWindow()">X</div>
+    </div>
+    <div class="about98-tabs">
+      <div class="about98-tab active" data-tab="about">About</div>
+      <div class="about98-tab" data-tab="leadership">Leadership</div>
+      <div class="about98-tab" data-tab="featured">Featured In</div>
+    </div>
+    <div class="about98-content" id="tab-about">
+      Needing outside talent isn’t a system glitch–it’s the norm. Today’s great agencies embrace and operationalize this reality. Since 2021, we’ve been empowering agencies to quickly and easily have access to the right freelance talent, stopping the hiring-firing cycle and burnout of existing staff that our industry has become famous for. Even with the move to project work, our scalable, seamless augmentation ensures that agencies can support their valuable employees while still improving profitability.
+
+We’re not just a stop-gap. We’re a best-in-class outside talent operating system that includes lightning-fast delivery, simple onboarding, agency culture briefings, and senior talent to oversee the work and relationship. It’s no wonder we’re loved by 50 agencies and counting.
+    </div>
+    <div class="about98-content" id="tab-leadership" style="display:none;">
+      <strong>Our Leadership Team</strong>
+      <ul>
+        <li id="christineItem" class="leader-item"><span class="leader-name">Christine Olivas</span>, <span class="leader-title">CEO &amp; Founder</span></li>
+        <li id="abigailItem" class="leader-item"><span class="leader-name">Abigail Olivas</span>, <span class="leader-title">Head of Strategy</span></li>
+        <li id="rachelItem" class="leader-item"><span class="leader-name">Rachel Peplow</span>, <span class="leader-title">Head of Experience</span></li>
+        <li id="ashleyItem" class="leader-item"><span class="leader-name">Ashley Weisser</span>, <span class="leader-title">Head of Operations</span></li>
+      </ul>
+    </div>
+    <div class="about98-content" id="tab-featured" style="display:none;">
+      <strong>Featured In</strong>
+      <ul>
+        <li>LBB – <a href="https://lbbonline.com/news/teamwork-makes-the-dream-work-at-no-single-individual" target="_blank">Teamwork Makes the Dream Work</a></li>
+        <li>Curiosity – <a href="https://www.curiosity.fun/thoughts/5-strategy-hacks-thatll-surprise-n-delight-with-christine-olivas-ceo-no-single-individual" target="_blank">Strategy Hacks</a></li>
+        <li>Inspiring Futures Podcast – <a href="https://open.spotify.com/episode/1luIjPHiWeLeukThiXUoLU" target="_blank">Building Today's Agency Model (feat. Christine Olivas)</a></li>
+        <li>Kitwing – <a href="https://kitwing.com/interview-christine-olivas/" target="_blank">How Christine Olivas Created a Win-Win (-Win) for an Entire Industry</a></li>
+      </ul>
+    </div>
+    <div class="about98-footer">
+      <button class="testimonial-button" onclick="openTestimonialWindow()">Client Testimonials</button>
+      <button class="download-button" onclick="downloadPdf()">Download Details</button>
+      <button onclick="openLinkedIn()">LinkedIn</button>
+    </div>
+  </div>
+  <!-- Profile windows -->
+  <div class="about98-window profile-window" id="profileWindow-Christine">
+    <div class="about98-title-bar profileTitleBar">
+      <img src="https://nosingleindividual.com/wp-content/uploads/2025/06/About_Icon.png" alt="Profile Icon">
+      Christine Olivas
+      <div class="about98-close-button" onclick="closeLeaderWindow('profileWindow-Christine')">X</div>
+    </div>
+    <div class="about98-content">
+      <div class="profile-photo">
+        <img src="https://nosingleindividual.com/wp-content/uploads/2025/06/ChristineO_Green_PFP.png" alt="Christine">
+      </div>
+      <div class="profile-details">
+        <h1>Christine Olivas</h1>
+        <h2>CEO &amp; Founder</h2>
+        <p class="prompt">What do you like most about No Single Individual?</p>
+        <p>My favorite part of No Single Individual is building something the industry really needs–both talent and agencies benefit.</p>
+        <p class="prompt">What gets you feeling nostalgic?</p>
+        <p>The thing that gets me the most nostalgic is seeing printed photos. It reminds me of a time where we had fun without phones–and had to wait for our pictures to develop.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="about98-window profile-window" id="profileWindow-Abigail">
+    <div class="about98-title-bar profileTitleBar">
+      <img src="https://nosingleindividual.com/wp-content/uploads/2025/06/About_Icon.png" alt="Profile Icon">
+      Abigail Olivas
+      <div class="about98-close-button" onclick="closeLeaderWindow('profileWindow-Abigail')">X</div>
+    </div>
+    <div class="about98-content">
+      <div class="profile-photo">
+        <img src="https://nosingleindividual.com/wp-content/uploads/2025/06/AbigailO_Green_PFP.png" alt="Abigail">
+      </div>
+      <div class="profile-details">
+        <h1>Abigail Olivas</h1>
+        <h2>Head of Strategy</h2>
+        <p class="prompt">What do you like most about No Single Individual?</p>
+        <p>What I love the most about No Single Individual is lifting up others to succeed.</p>
+        <p class="prompt">What gets you feeling nostalgic?</p>
+        <p>Going to a real-life, in-person mall gets me feeling nostalgic.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="about98-window profile-window" id="profileWindow-Rachel">
+    <div class="about98-title-bar profileTitleBar">
+      <img src="https://nosingleindividual.com/wp-content/uploads/2025/06/About_Icon.png" alt="Profile Icon">
+      Rachel Peplow
+      <div class="about98-close-button" onclick="closeLeaderWindow('profileWindow-Rachel')">X</div>
+    </div>
+    <div class="about98-content">
+      <div class="profile-photo">
+        <img src="https://nosingleindividual.com/wp-content/uploads/2025/06/RachelP_Green_PFP.png" alt="Rachel">
+      </div>
+      <div class="profile-details">
+        <h1>Rachel Peplow</h1>
+        <h2>Head of Experience</h2>
+        <p class="prompt">What do you like most about No Single Individual?</p>
+        <p>My favourite part of NSI = working with some truly incredible, strong, intelligent (and funny) women.</p>
+        <p class="prompt">What gets you feeling nostalgic?</p>
+        <p>The thing that gets me the most nostalgic = the Dawsons Creek theme tune or the smell of cut grass as it reminds me of playing out in the school fields (ok, why am I getting teary!?)</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="about98-window profile-window" id="profileWindow-Ashley">
+    <div class="about98-title-bar profileTitleBar">
+      <img src="https://nosingleindividual.com/wp-content/uploads/2025/06/About_Icon.png" alt="Profile Icon">
+      Ashley Weisser
+      <div class="about98-close-button" onclick="closeLeaderWindow('profileWindow-Ashley')">X</div>
+    </div>
+    <div class="about98-content">
+      <div class="profile-photo">
+        <img src="https://nosingleindividual.com/wp-content/uploads/2025/06/AshleyW_Green_PFP.png" alt="Ashley">
+      </div>
+      <div class="profile-details">
+        <h1>Ashley Weisser</h1>
+        <h2>Head of Operations</h2>
+        <p class="prompt">What do you like most about No Single Individual?</p>
+        <p>My favorite part of No Single Individual is getting to work with incredible, talented people - both members and clients - from all over.</p>
+        <p class="prompt">What gets you feeling nostalgic?</p>
+        <p>The thing that gets me the most nostalgic is going to the local ice cream parlor that opens every summer. It takes me straight back to childhood, anxiously waiting in the long line to order my hot fudge sundae with whip cream and extra sprinkles.</p>
+      </div>
+    </div>
+  </div>
+  <!-- Testimonial popup -->
+  <div class="testimonial-window" id="testimonialWindow">
+    <div class="testimonial-titlebar" id="testimonialTitlebar">
+      TESTIMONIALS
+      <div class="testimonial-close" onclick="closeTestimonialWindow()">X</div>
+    </div>
+    <div class="testimonial-content" id="testimonialContent">
+      <div id="testimonial-block">
+        <p class="text"></p>
+        <p class="author"></p>
+        <p class="title"></p>
+      </div>
+    </div>
+  </div>
+  <!-- Team Model popup -->
+
+  <div class="teamModel-window" id="teamModelWindow">
+    <div class="teamModel-title-bar" id="teamModelTitleBar">
+      <img src="https://nosingleindividual.com/wp-content/uploads/2025/06/Team_Model_Icon.png" alt="Team Model Icon">
+      TEAM MODEL
+      <div class="teamModel-close-button" onclick="closeTeamModel()">X</div>
+    </div>
+    <div class="teamModel-content">
+      Everyone is collecting names, but no one is building teams. We see it every day. Agencies with ever-changing needs are relying on an internal freelance “roster” or “database” to find outside talent. And even if they do find the right resources, they are left with a lot of extra work: onboarding, aligning across workstreams, overseeing work product and fixing disconnects after the fact. Sounds more analog than modern to us!
+
+Thankfully, No Single Individual’s model disrupts this manual, cumbersome process. With our innovative team approach, every strategy and account ask is addressed by a curated team, including all the expertise, seniority levels and agency know-how needed to do the best work, quickly and profitably. And with the most-vetted talent and deepest freelance network around, we have the right people every time.
+    </div>
+  </div>
+  <!-- Video popup -->
+
+  <div class="video-window" id="videoWindow">
+    <div class="video-title-bar" id="videoTitleBar">
+      Learn More Video
+      <div class="video-close-button" onclick="closeVideoWindow()">X</div>
+    </div>
+    <div class="video-content">
+      <video controls>
+        <source src="#" type="video/mp4">
+        Your browser does not support HTML5 video.
+      </video>
+    </div>
+  </div>
+  <!-- Services window -->
+
+  <div class="window" id="servicesWindow">
+    <div class="title-bar" id="servicesTitleBar">
+      <img src="https://nosingleindividual.com/wp-content/uploads/2025/06/Services_Icon-1.png" alt="">
+      SERVICES
+      <div class="close-button" onclick="closeServicesWindow()">X</div>
+    </div>
+    <div class="toolbar">
+      <span>File</span><span>Edit</span><span>View</span><span>Go</span><span>Favorites</span><span>Help</span>
+    </div>
+    <div class="toolbar">
+      <span>⬅</span><span>➡</span><span>⬆</span><span>✂️</span><span>📄</span><span>📋</span><span>🗃️</span>
+    </div>
+    <div class="address-bar">
+      Address: <input type="text" value="C:\\Services">
+    </div>
+    <div class="icon-area">
+      <div class="folder-icon" id="accountIcon">
+        <img src="https://nosingleindividual.com/wp-content/uploads/2025/06/Account_Icon.png" alt="">
+        <div>Account</div>
+      </div>
+      <div class="folder-icon" id="strategyIcon">
+        <img src="https://nosingleindividual.com/wp-content/uploads/2025/06/Strategy_Icon.png" alt="">
+        <div>Strategy</div>
+      </div>
+      <div class="folder-icon" id="industriesIcon">
+        <img src="https://nosingleindividual.com/wp-content/uploads/2025/06/Industries_Icon.png" alt="">
+        <div>Industries</div>
+      </div>
+      <div class="folder-icon" id="useCasesIcon">
+        <img src="https://nosingleindividual.com/wp-content/uploads/2025/06/Use_Cases_Icon.png" alt="">
+        <div>Use Cases</div>
+      </div>
+    </div>
+  </div>
+  <!-- Industries terminal window -->
+  <div class="window terminal-window" id="industriesWindow">
+    <div class="title-bar" id="industriesTitleBar">
+      <img src="https://nosingleindividual.com/wp-content/uploads/2025/06/Industries_Icon.png" alt="">
+      INDUSTRIES
+      <div class="close-button" onclick="closeIndustriesWindow()">X</div>
+    </div>
+    <div class="toolbar">
+      <button id="finishLoadingBtn">Finish Loading</button>
+    </div>
+    <div class="terminal-content" id="terminalContent"></div>
+  </div>
+  <!-- Use Cases popup -->
+
+  <div class="nsiap-window" id="useCasesWindow">
+    <div class="nsiap-title-bar">
+      WHY AGENCIES TURN TO NO SINGLE INDIVIDUAL AND HOW THEY BENEFIT
+      <div class="nsiap-close-button" onclick="closeUseCasesWindow()">X</div>
+    </div>
+    <div class="nsiap-menu-bar">
+      <span>File</span><span>Edit</span><span>Insert</span><span>People</span>
+    </div>
+    <div class="nsiap-chat"></div>
+    <div class="nsiap-format-bar">
+      <button title="Font">A</button><button title="Inc">A▲</button><button title="Dec">A▼</button>
+      <button title="B"><b>B</b></button><button title="I"><i>I</i></button><button title="U"><u>U</u></button>
+      <button title="Link">link</button><button title="IMG">IMG</button><button title="😊">😊</button>
+      <button title="More">≡</button>
+    </div>
+    <div class="nsiap-input-area">
+      <button class="option">We need help on a huge pitch.</button>
+      <button class="option">We are understaffed.</button>
+      <button class="option">We have a family leave coming up.</button>
+      <button class="option">We don’t have {x} strategy.</button>
+      <button class="option">We need help but we aren’t even sure where to start.</button>
+    </div>
+    <div class="nsiap-icon-bar" id="msnBar">
+      <button class="msn-icon" id="dogBtn"><span>🐶</span></button>
+      <button class="msn-icon" id="expressBtn"><span>😊</span>Expr</button>
+      <button class="msn-icon" id="gamesBtn"><span>🎮</span>Games</button>
+      <button class="msn-icon msn-disabled" id="videoBtn"><span>🎞</span>Video</button>
+      <button class="msn-icon msn-disabled" id="talkBtn"><span>💬</span>Talk</button>
+      <div class="emoji-picker" id="emojiPicker">
+        <span>😀</span><span>😂</span><span>😍</span><span>😭</span><span>😎</span>
+      </div>
+    </div>
+    <div class="tetris-popup" id="tetrisPopup">
+      <button class="close" id="closeTetris">X</button>
+      <canvas id="tetrisCanvas" width="200" height="400"></canvas>
+    </div>
+  </div>
+  <!-- Account window -->
+
+  <div class="window" id="accountWindow">
+    <div class="title-bar" id="accountTitleBar">
+      <img src="https://nosingleindividual.com/wp-content/uploads/2025/06/Account_Icon.png" alt="">
+      ACCOUNT
+      <div class="close-button" onclick="closeAccountWindow()">X</div>
+    </div>
+    <div class="window-content">
+      <p class="account-header">Account Management</p>
+      <p class="account-intro">
+        We are tailored for your agency and<br>
+        designed to elevate your client relationships.
+      </p>
+      <ul>
+        <li>Client Relationship Management</li>
+        <li>Strategic Account Planning</li>
+        <li>Cross-Selling and Upselling</li>
+        <li>Account Analysis and Reporting</li>
+        <li>Contract Negotiation and Renewal</li>
+        <li>Customer Success Management</li>
+        <li>Risk Management</li>
+        <li>Team Collaboration</li>
+        <li>Market Research and Analysis</li>
+        <li>Performance Metrics and KPIs</li>
+      </ul>
+    </div>
+  </div>
+  <!-- Strategy window -->
+
+  <div class="window" id="strategyWindow">
+    <div class="title-bar" id="strategyTitleBar">
+      <img src="https://nosingleindividual.com/wp-content/uploads/2025/06/Strategy_Icon.png" alt="">
+      STRATEGY
+      <div class="close-button" onclick="closeStrategyWindow()">X</div>
+    </div>
+    <div class="window-content">
+      <p class="strategy-header">Strategy</p>
+      <p class="intro">
+        We thrive on the most complex challenges,<br>
+        and we’ve never met a problem we can’t tackle.
+      </p>
+      <ul>
+        <li>Brand Strategy &amp; Positioning</li>
+        <li>Shopper &amp; Commerce Strategy</li>
+        <li>Audience &amp; Persona Development</li>
+        <li>Comms &amp; Activation Planning</li>
+        <li>Experiential Marketing</li>
+        <li>Workshop Facilitation</li>
+        <li>Awards Submissions</li>
+        <li>Social Strategy &amp; Management</li>
+        <li>Content Playbooks</li>
+        <li>Pitch / RFP Support</li>
+        <li>Performance &amp; Digital Strategy</li>
+        <li>Paid Ad Management</li>
+        <li>Agency Positioning &amp; Capabilities</li>
+        <li>Cultural Intelligence</li>
+      </ul>
+    </div>
+  <!-- NSI Paint window -->
+  </div>
+  <div class="nsiPaint-window" id="nsiPaintWindow">
+    <div class="nsiPaint-titlebar" id="nsiPaintTitlebar">
+      <img src="https://nosingleindividual.com/wp-content/uploads/2025/06/NSI_Paint_Icon.png" alt="Icon">
+      NSI PAINT
+      <div class="nsiPaint-close" onclick="closePaintWindow()">X</div>
+    </div>
+    <div class="nsiPaint-main">
+      <canvas id="nsiPaintCanvas"></canvas>
+    </div>
+    <div class="nsiPaint-colors" id="nsiPaintColors"></div>
+  </div>
+  <!-- Contact window -->
+
+  <div class="contact98-window" id="contact98Window">
+    <div class="contact98-titlebar" id="contact98Titlebar">
+      <img src="https://nosingleindividual.com/wp-content/uploads/2025/06/Contact_Icon.png" alt="Contact Icon">
+      CONTACT
+      <div class="contact98-close" onclick="closeContact98Window()">X</div>
+    </div>
+    <div class="contact98-content">
+      <div id="hubspotFormContainer"></div>
+    </div>
+  </div>
+
+  <script charset="utf-8" type="text/javascript" src="//js.hsforms.net/forms/embed/v2.js"></script>
+  <script defer>
+    // z-index helper
+    let zIndexCounter = 1000;
+    function bringToFront(win){ win.style.zIndex = ++zIndexCounter; }
+    // Utility functions
+    function clampToViewport(el){const r=el.getBoundingClientRect();let l=parseFloat(el.style.left)||r.left;let t=parseFloat(el.style.top)||r.top;if(l<0)l=0;if(t<0)t=0;if(l+r.width>window.innerWidth)l=window.innerWidth-r.width;if(t+r.height>window.innerHeight)t=window.innerHeight-r.height;el.style.left=l+"px";el.style.top=t+"px";}
+    document.addEventListener('DOMContentLoaded',()=>{hbspt.forms.create({portalId:'46895957',formId:'6f93f4d4-1cac-41af-a7a0-d4e0ca7284c8',region:'na1',target:'#hubspotFormContainer'});});
+    // ----- About window -----
+    const about98WindowEl=document.getElementById('about98Window'),about98TitleBar=document.getElementById('about98TitleBar');
+    function about98ShowWindow(){about98WindowEl.style.display='flex';const r=about98WindowEl.getBoundingClientRect();about98WindowEl.style.left=`${(window.innerWidth-r.width)/2}px`;about98WindowEl.style.top=`${(window.innerHeight-r.height)/2}px`;about98WindowEl.style.transform='none';bringToFront(about98WindowEl);clampToViewport(about98WindowEl);}
+    function about98CloseWindow(){about98WindowEl.style.display='none';}
+    let dragMain=false,offXMain,offYMain;
+    about98TitleBar.addEventListener('mousedown',e=>{dragMain=true;const r=about98WindowEl.getBoundingClientRect();offXMain=e.clientX-r.left;offYMain=e.clientY-r.top;bringToFront(about98WindowEl);e.preventDefault();});
+    document.addEventListener('mouseup',()=>dragMain=false);
+    document.addEventListener('mousemove',e=>{if(!dragMain)return;about98WindowEl.style.left=`${e.clientX-offXMain}px`;about98WindowEl.style.top=`${e.clientY-offYMain}px`;clampToViewport(about98WindowEl);});
+    document.querySelectorAll('.about98-tab').forEach(tab=>{tab.addEventListener('click',()=>{document.querySelectorAll('.about98-tab').forEach(t=>t.classList.remove('active'));tab.classList.add('active');const sel='tab-'+tab.dataset.tab;document.querySelectorAll('#about98Window .about98-content').forEach(c=>c.id===sel?c.style.display='block':c.style.display='none');});});
+    function downloadPdf(){const a=document.createElement('a');a.href='https://nosingleindividual.com/wp-content/uploads/2024/07/Meet-No-Single-Individual.pdf';a.download='Meet-No-Single-Individual.pdf';document.body.appendChild(a);a.click();document.body.removeChild(a);}
+    function openLinkedIn(){window.open('https://www.linkedin.com/company/no-single-indiv/','_blank');}
+    document.getElementById('christineItem').addEventListener('click',()=>showLeaderWindow('profileWindow-Christine'));
+    document.getElementById('abigailItem').addEventListener('click',()=>showLeaderWindow('profileWindow-Abigail'));
+    document.getElementById('rachelItem').addEventListener('click',()=>showLeaderWindow('profileWindow-Rachel'));
+    document.getElementById('ashleyItem').addEventListener('click',()=>showLeaderWindow('profileWindow-Ashley'));
+    function showLeaderWindow(id){const win=document.getElementById(id);win.style.display='flex';const r=win.getBoundingClientRect();win.style.left=`${(window.innerWidth-r.width)/2}px`;win.style.top=`${(window.innerHeight-r.height)/2}px`;win.style.transform='none';bringToFront(win);clampToViewport(win);}
+    function closeLeaderWindow(id){document.getElementById(id).style.display='none';}
+    // ----- Profile windows -----
+    let dragProfile=false,offXProf,offYProf,currentProfWin=null;
+    document.querySelectorAll('.profileTitleBar').forEach(bar=>{bar.addEventListener('mousedown',e=>{dragProfile=true;currentProfWin=e.target.closest('.about98-window');const r=currentProfWin.getBoundingClientRect();offXProf=e.clientX-r.left;offYProf=e.clientY-r.top;bringToFront(currentProfWin);e.preventDefault();});});
+    document.addEventListener('mouseup',()=>{dragProfile=false;currentProfWin=null;});
+    document.addEventListener('mousemove',e=>{if(!dragProfile||!currentProfWin)return;currentProfWin.style.left=`${e.clientX-offXProf}px`;currentProfWin.style.top=`${e.clientY-offYProf}px`;clampToViewport(currentProfWin);});
+    // ----- Testimonial popup -----
+    const testimonialWindow=document.getElementById('testimonialWindow'),testimonialTitlebar=document.getElementById('testimonialTitlebar'),testimonialContent=document.getElementById('testimonialContent'),testimonialBlock=document.getElementById('testimonial-block'),textElem=testimonialBlock.querySelector('p.text'),authorElem=testimonialBlock.querySelector('p.author'),titleElem=testimonialBlock.querySelector('p.title');
+    const testimonials=[{text:"With one of our senior strategists on maternity leave, and several key strategic projects in the works, we had a big gap to fill. They jumped right into several projects that were mid-way through and provided immediate strategic oversight, briefing creatives, overseeing creative output, writing several key marketing strategies and interacting seamlessly with clients. Their high-level of strategic thinking, and ability to develop and articulate a comprehensive marketing strategy, was critical to ensuring our clients were impressed time and again. Plus, their effortless integration with our team was invaluable!",author:"Fearon Perry",title:"Former SVP Brand & Content Strategy"},{text:"They have been a strategic partner for us on several projects to-date, including clients and new business. They've brought strategists with different skill sets to each project, and worked to create relationships with our internal agency stakeholders; as well as clients. They are fast and have a deep bench. But my favorite part of partnering with them is when we push, pull, twist, and shape a new and thoughtful strategy together that inspires and prepares our team and clients to make great work.",author:"Jess Vahsholtz",title:"Executive Director Account Management"},{text:"We had our biggest pitch of the year, and their team model was just what we needed. In a few short sprints, they built the strategic framework, briefed creatives and even ran a virtual focus group in several days.",author:"Julianna Katrancha",title:"Former EVP Strategy"},{text:"Where do I start! They were instrumental in providing strawberryfrog with facilitation support for a large client of ours. Christine and her team of brilliant strategists and facilitators jumped right in and helped us navigate through the entire 6-week project and were the perfect compliment to our existing internal team. They are quick to respond to requests, have the ability to immerse themselves into the culture of your company, flexible with timing and flawlessly execute the assignment. They are absolute pros and I would recommend them to any company looking for strategy and/or facilitation support.",author:"Ryan Maloney",title:"Head of Talent"},{text:"Among the best solutions we’ve discovered for managing and thriving in the dynamic marketing and agency environment is Christine Olivas’ team. We’ve brought them in for both short stints to survive chaos and also longer-term arrangements to cover maternity leave or just simply manage a long stretch of new business activity and client onboarding. Every experience has been stellar, with smart individuals jumping in seamlessly to make a difference. They are all also quite lovely in terms of style, personality, and ways of working. Their team contributed directly to our ability to grow revenue profitably without burning out the existing team, and their involvement happened without creating awkward situations as they transitioned on or off the business. I will always see them as a truly valuable extension of my team.",author:"Cheryl Policastro",title:"Former Chief Strategy Officer"}];
+    const colors=['rgb(255, 0, 89)','rgb(255, 66, 255)','rgb(163, 255, 0)','rgb(0, 204, 0)','rgb(163, 112, 255)'];
+    let currentTestimonialIndex=0,currentColorIndex=0;
+    function updateTestimonialAndColor(){const t=testimonials[currentTestimonialIndex];textElem.textContent=t.text;authorElem.textContent=t.author;titleElem.textContent=t.title;testimonialBlock.style.backgroundColor=colors[currentColorIndex];currentTestimonialIndex=(currentTestimonialIndex+1)%testimonials.length;currentColorIndex=(currentColorIndex+1)%colors.length;}
+    updateTestimonialAndColor();
+    let posX,posY;let velX=2,velY=2;let isPaused=false;let lastTrailTime=0;
+    initializePosition();
+    function initializePosition(){const cw=testimonialContent.clientWidth-testimonialBlock.offsetWidth;const ch=testimonialContent.clientHeight-testimonialBlock.offsetHeight;posX=Math.random()*(cw>0?cw:0);posY=Math.random()*(ch>0?ch:0);testimonialBlock.style.left=posX+'px';testimonialBlock.style.top=posY+'px';}
+    function createTrail(x,y,w,h,color){const trail=document.createElement('div');trail.className='trail';trail.style.left=x+'px';trail.style.top=y+'px';trail.style.width=w+'px';trail.style.height=h+'px';trail.style.backgroundColor=color;trail.style.opacity='0.5';testimonialContent.appendChild(trail);requestAnimationFrame(()=>{trail.style.opacity='0';});setTimeout(()=>{trail.parentNode&&trail.parentNode.removeChild(trail);},2000);}
+    function animate(){if(!isPaused){const prevX=posX;const prevY=posY;const prevColor=window.getComputedStyle(testimonialBlock).backgroundColor;const blockW=testimonialBlock.offsetWidth;const blockH=testimonialBlock.offsetHeight;posX+=velX;posY+=velY;let bounced=false;const cw=testimonialContent.clientWidth;const ch=testimonialContent.clientHeight;if(posX<=0){posX=0;velX=-velX;bounced=true;}if(posX+blockW>=cw){posX=cw-blockW;velX=-velX;bounced=true;}if(posY<=0){posY=0;velY=-velY;bounced=true;}if(posY+blockH>=ch){posY=ch-blockH;velY=-velY;bounced=true;}if(bounced){updateTestimonialAndColor();}const now=Date.now();if(now-lastTrailTime>50){createTrail(prevX,prevY,blockW,blockH,prevColor);lastTrailTime=now;}testimonialBlock.style.left=posX+'px';testimonialBlock.style.top=posY+'px';}requestAnimationFrame(animate);}
+    testimonialBlock.addEventListener('mouseenter',()=>{isPaused=true;});
+    testimonialBlock.addEventListener('mouseleave',()=>{isPaused=false;});
+    function openTestimonialWindow(){testimonialWindow.style.display='block';const rect=testimonialWindow.getBoundingClientRect();testimonialWindow.style.left=`${window.innerWidth/2-rect.width/2}px`;testimonialWindow.style.top=`${window.innerHeight/2-rect.height/2}px`;testimonialWindow.style.transform='none';bringToFront(testimonialWindow);clampToViewport(testimonialWindow);initializePosition();}
+    function closeTestimonialWindow(){testimonialWindow.style.display='none';}
+    let testimonialOffsetX,testimonialOffsetY,testimonialIsDragging=false;
+    testimonialTitlebar.addEventListener('mousedown',e=>{testimonialIsDragging=true;const rect=testimonialWindow.getBoundingClientRect();testimonialOffsetX=e.clientX-rect.left;testimonialOffsetY=e.clientY-rect.top;testimonialWindow.style.transform='none';bringToFront(testimonialWindow);e.preventDefault();});
+    document.addEventListener('mouseup',()=>testimonialIsDragging=false);
+    document.addEventListener('mousemove',e=>{if(testimonialIsDragging){testimonialWindow.style.left=`${e.clientX-testimonialOffsetX}px`;testimonialWindow.style.top=`${e.clientY-testimonialOffsetY}px`;clampToViewport(testimonialWindow);}});
+    testimonialTitlebar.addEventListener('touchstart',e=>{testimonialIsDragging=true;const touch=e.changedTouches[0];const rect=testimonialWindow.getBoundingClientRect();testimonialOffsetX=touch.clientX-rect.left;testimonialOffsetY=touch.clientY-rect.top;testimonialWindow.style.transform='none';bringToFront(testimonialWindow);e.preventDefault();});
+    document.addEventListener('touchend',()=>testimonialIsDragging=false);
+    document.addEventListener('touchmove',e=>{if(testimonialIsDragging){const touch=e.changedTouches[0];testimonialWindow.style.left=`${touch.clientX-testimonialOffsetX}px`;testimonialWindow.style.top=`${touch.clientY-testimonialOffsetY}px`;clampToViewport(testimonialWindow);}});
+    function clampTestimonialPosition(){const cw=testimonialContent.clientWidth-testimonialBlock.offsetWidth;const ch=testimonialContent.clientHeight-testimonialBlock.offsetHeight;if(posX>cw)posX=cw>0?cw:0;if(posY>ch)posY=ch>0?ch:0;testimonialBlock.style.left=posX+'px';testimonialBlock.style.top=posY+'px';}
+    window.addEventListener('resize',()=>{if(testimonialWindow.style.display==='block'){clampTestimonialPosition();clampToViewport(testimonialWindow);}});
+    let lastContentWidth=testimonialContent.clientWidth,lastContentHeight=testimonialContent.clientHeight;
+    setInterval(()=>{const cw=testimonialContent.clientWidth;const ch=testimonialContent.clientHeight;if(cw!==lastContentWidth||ch!==lastContentHeight){clampTestimonialPosition();lastContentWidth=cw;lastContentHeight=ch;}},300);
+    animate();
+    // ----- Team Model popup -----
+    const teamWindow=document.getElementById('teamModelWindow');
+    const titleBar=document.getElementById('teamModelTitleBar');
+    function showTeamModel(){teamWindow.style.display='flex';teamWindow.style.transform='none';const r=teamWindow.getBoundingClientRect();teamWindow.style.left=((window.innerWidth-r.width)/2)+'px';teamWindow.style.top=((window.innerHeight-r.height)/2)+'px';bringToFront(teamWindow);clampToViewport(teamWindow);}
+    function closeTeamModel(){teamWindow.style.display='none';}
+    let isDragging=false,teamOffsetX,teamOffsetY;
+    titleBar.addEventListener('mousedown',e=>{isDragging=true;const rect=teamWindow.getBoundingClientRect();teamOffsetX=e.clientX-rect.left;teamOffsetY=e.clientY-rect.top;bringToFront(teamWindow);e.preventDefault();});
+    document.addEventListener('mouseup',()=>isDragging=false);
+    document.addEventListener('mousemove',e=>{if(!isDragging)return;teamWindow.style.left=(e.clientX-teamOffsetX)+'px';teamWindow.style.top=(e.clientY-teamOffsetY)+'px';clampToViewport(teamWindow);});
+    // ----- Video popup -----
+    const videoWindow=document.getElementById('videoWindow');
+    const videoTitleBar=document.getElementById('videoTitleBar');
+    function showVideoWindow(){videoWindow.style.display='flex';videoWindow.style.transform='none';const r=videoWindow.getBoundingClientRect();videoWindow.style.left=((window.innerWidth-r.width)/2)+'px';videoWindow.style.top=((window.innerHeight-r.height)/2)+'px';bringToFront(videoWindow);clampToViewport(videoWindow);}
+    function closeVideoWindow(){videoWindow.style.display='none';}
+    let vidDrag=false,vidOffX,vidOffY;
+    videoTitleBar.addEventListener('mousedown',e=>{vidDrag=true;const rect=videoWindow.getBoundingClientRect();vidOffX=e.clientX-rect.left;vidOffY=e.clientY-rect.top;bringToFront(videoWindow);e.preventDefault();});
+    document.addEventListener('mouseup',()=>vidDrag=false);
+    document.addEventListener('mousemove',e=>{if(!vidDrag)return;videoWindow.style.left=(e.clientX-vidOffX)+'px';videoWindow.style.top=(e.clientY-vidOffY)+'px';clampToViewport(videoWindow);});
+    function centerAndShow(win){win.style.display='flex';const r=win.getBoundingClientRect();win.style.left=(window.innerWidth-r.width)/2+'px';win.style.top=(window.innerHeight-r.height)/2+'px';win.style.transform='none';bringToFront(win);clampToViewport(win);}
+    function hide(win){win.style.display='none';}
+    // ----- Services and folder windows -----
+    const servicesWindow=document.getElementById('servicesWindow'),servicesTitleBar=document.getElementById('servicesTitleBar');
+    function showServicesWindow(){centerAndShow(servicesWindow);}function closeServicesWindow(){hide(servicesWindow);}
+    let sDX,sDY,sDrag=false;servicesTitleBar.addEventListener('mousedown',e=>{if(e.target.closest('.close-button'))return;sDrag=true;const r=servicesWindow.getBoundingClientRect();sDX=e.clientX-r.left;sDY=e.clientY-r.top;servicesWindow.style.transform='none';bringToFront(servicesWindow);e.preventDefault();});
+    document.addEventListener('mouseup',()=>sDrag=false);
+    document.addEventListener('mousemove',e=>{if(!sDrag)return;servicesWindow.style.left=`${e.clientX-sDX}px`;servicesWindow.style.top=`${e.clientY-sDY}px`;clampToViewport(servicesWindow);});
+    // ----- Industries terminal -----
+    const industriesWindow=document.getElementById('industriesWindow'),industriesTitleBar=document.getElementById('industriesTitleBar'),industriesIcon=document.getElementById('industriesIcon'),terminalContent=document.getElementById('terminalContent'),finishLoadingBtn=document.getElementById('finishLoadingBtn');
+    let iDX,iDY,iDrag=false,tTimer,tIdx=0;
+    const industryText=` 1. Wellness    Skincare    Aesthetics    DTC    Personal Care    Aromatherapy    Fitness  2. Consumer Packaged Goods    Home Improvement    Apparel    Personal Care    Skincare    Food & Beverage    Toys & Games    Auto / Home    Tobacco  3. Retail & Shopper Marketing    eCommerce    Brick and Mortar    Cars & Trucks    Auto / Home    Food & Beverage    Apparel    Personal Care  4. Technology / Software    Web / App Development    SaaS    Environmental    Cybersecurity    Servers / Storage    Chat / Bots  5. Education    College & Universities    K-12    EdTech  6. Travel / Tourism    Destination    Attraction    Hotel    Airline  7. Pharma / Healthcare    Health Tech    OTC    Payers / Plans    Vaccines    Prescription    Medical Supplies  8. Financial Services    Credit Cards    Loans / Lending    Banks    Crypto / Blockchain    Fintech    Auto / Home  9. Non-Profit    Vaccines    Health Tech  10. Security     Cybersecurity     Cyber Insurance  11. Food Service     Casual Dining     QSR  12. Automotive     Cars & Trucks     Service  …and yeah, we’ve done that too:    Lifestyle / Development    Advertising / Media    Sustainability    Real Estate / Development    Sports / Entertainment    Cannabis / CBD    Manufacturing    Casino / Gaming    Utilities    AEC    Transportation / Logistics    Military `;
+    industriesIcon.addEventListener('click',()=>{centerAndShow(industriesWindow);clearTimeout(tTimer);terminalContent.textContent='';tIdx=0;typeChar();});
+    function typeChar(){if(tIdx<industryText.length){terminalContent.textContent+=industryText[tIdx++];terminalContent.scrollTop=terminalContent.scrollHeight;tTimer=setTimeout(typeChar,20);}}
+    finishLoadingBtn.addEventListener('click',()=>{clearTimeout(tTimer);terminalContent.textContent+=industryText.slice(tIdx);tIdx=industryText.length;terminalContent.scrollTop=terminalContent.scrollHeight;});
+    function closeIndustriesWindow(){clearTimeout(tTimer);hide(industriesWindow);}
+    industriesTitleBar.addEventListener('mousedown',e=>{if(e.target.closest('.close-button'))return;iDrag=true;const r=industriesWindow.getBoundingClientRect();iDX=e.clientX-r.left;iDY=e.clientY-r.top;industriesWindow.style.transform='none';bringToFront(industriesWindow);e.preventDefault();});
+    document.addEventListener('mouseup',()=>iDrag=false);
+    document.addEventListener('mousemove',e=>{if(!iDrag)return;industriesWindow.style.left=`${e.clientX-iDX}px`;industriesWindow.style.top=`${e.clientY-iDY}px`;clampToViewport(industriesWindow);});
+    // ----- Use Cases popup -----
+    const useCasesIcon=document.getElementById('useCasesIcon'),useCasesWindow=document.getElementById('useCasesWindow'),responseMap={"We need help on a huge pitch.":"We have elite, hands-on teams that can simultaneously build the story & brief creatives!","We are understaffed.":"We can infuse fresh thinking and energy that inspires and lightens the mental load!","We have a family leave coming up.":"Don't worry, we have a way to maintain client trust while supporting the reintegration of the team member.","We don’t have {x} strategy.":"We have specific area and/or vertical expertise at a variety of seniority levels for faster, better work.","We need help but we aren’t even sure where to start.":"We have senior leaders who can diagnose the true outside talent needs and bring in the right expertise!"};
+    useCasesIcon.addEventListener('click',()=>{centerAndShow(useCasesWindow);useCasesWindow.querySelector('.nsiap-chat').innerHTML='';});
+    function closeUseCasesWindow(){hide(useCasesWindow);}
+    useCasesWindow.querySelectorAll('.nsiap-input-area button.option').forEach(btn=>btn.addEventListener('click',()=>{const txt=btn.textContent.trim();const chat=useCasesWindow.querySelector('.nsiap-chat');const u=document.createElement('div');u.className='message user';u.innerHTML=`<span class="sender">Y0ur_Ag3ncy:</span> ${txt}`;chat.appendChild(u);chat.parentNode.scrollTop=chat.parentNode.scrollHeight;const ind=document.createElement('div');ind.className='typing-indicator';ind.innerHTML=`<span class="sender">NoSingleInd1vidual:</span><span class="typing-text">Typing<span class="dots"></span></span>`;chat.appendChild(ind);chat.parentNode.scrollTop=chat.parentNode.scrollHeight;let dots=0,cycles=0;const maxDots=3,maxCycles=1;const dotEl=ind.querySelector('.dots');const iv=setInterval(()=>{dots=(dots+1)%(maxDots+1);dotEl.textContent='.'.repeat(dots);if(dots===0&&++cycles===maxCycles){clearInterval(iv);ind.remove();const r=document.createElement('div');r.className='message response';r.innerHTML=`<span class="sender">NoSingleInd1vidual:</span> `+responseMap[txt];chat.appendChild(r);chat.parentNode.scrollTop=chat.parentNode.scrollHeight;}},400);}));
+    const useCasesTitleBar=useCasesWindow.querySelector('.nsiap-title-bar');let uDX,uDY,uDrag=false;useCasesTitleBar.addEventListener('mousedown',e=>{if(e.target.closest('.nsiap-close-button'))return;uDrag=true;const r=useCasesWindow.getBoundingClientRect();uDX=e.clientX-r.left;uDY=e.clientY-r.top;useCasesWindow.style.transform='none';bringToFront(useCasesWindow);e.preventDefault();});
+    document.addEventListener('mouseup',()=>uDrag=false);
+    document.addEventListener('mousemove',e=>{if(!uDrag)return;useCasesWindow.style.left=`${e.clientX-uDX}px`;useCasesWindow.style.top=`${e.clientY-uDY}px`;clampToViewport(useCasesWindow);});
+    const emojiPicker=document.getElementById('emojiPicker'),expressBtn=document.getElementById('expressBtn');
+    expressBtn.addEventListener('click',e=>{emojiPicker.style.display=emojiPicker.style.display==='block'?'none':'block';emojiPicker.style.left=e.currentTarget.offsetLeft+'px';});
+    emojiPicker.addEventListener('click',e=>{if(e.target.tagName==='SPAN'){const chat=useCasesWindow.querySelector('.nsiap-chat');const msg=document.createElement('div');msg.className='message user';msg.innerHTML=`<span class="sender">You:</span> ${e.target.textContent}`;chat.appendChild(msg);chat.parentNode.scrollTop=chat.parentNode.scrollHeight;emojiPicker.style.display='none';}});
+    const dogBtn=document.getElementById('dogBtn');dogBtn.addEventListener('click',()=>{const chat=useCasesWindow.querySelector('.nsiap-chat');const img=document.createElement('img');img.src='https://nosingleindividual.com/wp-content/uploads/2025/06/WalkingDog.gif';img.className='walking-dog';chat.appendChild(img);setTimeout(()=>img.remove(),5000);});
+    const gamesBtn=document.getElementById('gamesBtn'),tetrisPopup=document.getElementById('tetrisPopup'),tetrisCanvas=document.getElementById('tetrisCanvas'),closeTetris=document.getElementById('closeTetris');
+    gamesBtn.addEventListener('click',()=>{tetrisPopup.style.display='flex';initTetris();bringToFront(tetrisPopup);});
+    closeTetris.addEventListener('click',()=>{tetrisPopup.style.display='none';endTetris();});
+    let board,piece,dropInterval;const COLS=10,ROWS=20,BLOCK=20,ctxT=tetrisCanvas.getContext('2d');
+    const shapes=[[[0,0],[1,0],[0,1],[1,1]],[[0,0],[-1,0],[1,0],[2,0]],[[0,0],[-1,0],[0,1],[1,1]],[[0,0],[1,0],[0,1],[-1,1]],[[0,0],[-1,0],[1,0],[1,1]],[[0,0],[-1,0],[1,0],[-1,1]],[[0,0],[-1,0],[1,0],[0,1]]];
+    function initBoard(){board=Array.from({length:ROWS},()=>Array(COLS).fill(0));}
+    function newPiece(){piece={shape:shapes[Math.floor(Math.random()*shapes.length)],x:4,y:0,color:'cyan'};}
+    function drawCell(x,y,c){ctxT.fillStyle=c;ctxT.fillRect(x*BLOCK,y*BLOCK,BLOCK-1,BLOCK-1);}
+    function draw(){ctxT.clearRect(0,0,tetrisCanvas.width,tetrisCanvas.height);board.forEach((row,y)=>row.forEach((v,x)=>{if(v)drawCell(x,y,v);}));piece.shape.forEach(([x,y])=>drawCell(piece.x+x,piece.y+y,piece.color));}
+    function collision(px=piece.x,py=piece.y,ps=piece.shape){return ps.some(([x,y])=>{const nx=px+x,ny=py+y;return nx<0||nx>=COLS||ny>=ROWS||(ny>=0&&board[ny][nx]);});}
+    function freeze(){piece.shape.forEach(([x,y])=>{const nx=piece.x+x,ny=piece.y+y;if(ny>=0)board[ny][nx]=piece.color;});clearLines();newPiece();if(collision())endTetris();}
+    function clearLines(){for(let y=ROWS-1;y>=0;y--){if(board[y].every(v=>v)){board.splice(y,1);board.unshift(Array(COLS).fill(0));y++;}}}
+    function drop(){if(!collision(piece.x,piece.y+1))piece.y++;else freeze();draw();}
+    function move(dx){if(!collision(piece.x+dx,piece.y)){piece.x+=dx;draw();}}
+    function rotate(){const rot=piece.shape.map(([x,y])=>[-y,x]);if(!collision(piece.x,piece.y,rot))piece.shape=rot;draw();}
+    function key(e){if(e.key==='ArrowLeft')move(-1);else if(e.key==='ArrowRight')move(1);else if(e.key==='ArrowDown')drop();else if(e.key==='ArrowUp')rotate();}
+    function initTetris(){initBoard();newPiece();draw();document.addEventListener('keydown',key);dropInterval=setInterval(drop,500);}
+    function endTetris(){clearInterval(dropInterval);document.removeEventListener('keydown',key);}
+    // ----- Account window -----
+    const accountIcon=document.getElementById('accountIcon'),accountWindow=document.getElementById('accountWindow'),accountTitle=document.getElementById('accountTitleBar');
+    accountIcon.addEventListener('click',()=>centerAndShow(accountWindow));
+    function closeAccountWindow(){hide(accountWindow);}
+    let aDX,aDY,aDrag=false;accountTitle.addEventListener('mousedown',e=>{if(e.target.closest('.close-button'))return;aDrag=true;const r=accountWindow.getBoundingClientRect();aDX=e.clientX-r.left;aDY=e.clientY-r.top;accountWindow.style.transform='none';bringToFront(accountWindow);e.preventDefault();});
+    document.addEventListener('mouseup',()=>aDrag=false);
+    document.addEventListener('mousemove',e=>{if(!aDrag)return;accountWindow.style.left=`${e.clientX-aDX}px`;accountWindow.style.top=`${e.clientY-aDY}px`;clampToViewport(accountWindow);});
+    // ----- Strategy window -----
+    const strategyIcon=document.getElementById('strategyIcon'),strategyWindow=document.getElementById('strategyWindow'),strategyTitle=document.getElementById('strategyTitleBar');
+    strategyIcon.addEventListener('click',()=>centerAndShow(strategyWindow));
+    function closeStrategyWindow(){hide(strategyWindow);}
+    let rDX,rDY,rDrag=false;strategyTitle.addEventListener('mousedown',e=>{if(e.target.closest('.close-button'))return;rDrag=true;const r=strategyWindow.getBoundingClientRect();rDX=e.clientX-r.left;rDY=e.clientY-r.top;strategyWindow.style.transform='none';bringToFront(strategyWindow);e.preventDefault();});
+    document.addEventListener('mouseup',()=>rDrag=false);
+    document.addEventListener('mousemove',e=>{if(!rDrag)return;strategyWindow.style.left=`${e.clientX-rDX}px`;strategyWindow.style.top=`${e.clientY-rDY}px`;clampToViewport(strategyWindow);});
+    // ----- NSI Paint window -----
+    const paintWindow=document.getElementById('nsiPaintWindow'),titleBarPaint=document.getElementById('nsiPaintTitlebar'),canvas=document.getElementById('nsiPaintCanvas'),ctx=canvas.getContext('2d'),colorsContainer=document.getElementById('nsiPaintColors');
+    let drawing=false,currentColor='#000000';let paintOffsetX,paintOffsetY;let dragging=false;
+    function openPaintWindow(){paintWindow.style.display='flex';centerPaintWindow();resizeCanvas();bringToFront(paintWindow);}
+    function closePaintWindow(){paintWindow.style.display='none';}
+    function centerPaintWindow(){const rect=paintWindow.getBoundingClientRect();paintWindow.style.left=`${(window.innerWidth-rect.width)/2}px`;paintWindow.style.top=`${(window.innerHeight-rect.height)/2}px`;paintWindow.style.transform='none';clampToViewport(paintWindow);}
+    titleBarPaint.addEventListener('mousedown',e=>{dragging=true;const rect=paintWindow.getBoundingClientRect();paintOffsetX=e.clientX-rect.left;paintOffsetY=e.clientY-rect.top;bringToFront(paintWindow);e.preventDefault();});
+    document.addEventListener('mouseup',()=>{dragging=false;});
+    document.addEventListener('mousemove',e=>{if(!dragging)return;paintWindow.style.left=`${e.clientX-paintOffsetX}px`;paintWindow.style.top=`${e.clientY-paintOffsetY}px`;clampToViewport(paintWindow);});
+    function resizeCanvas(){const container=document.querySelector('.nsiPaint-main');canvas.width=container.clientWidth;canvas.height=container.clientHeight;}
+    window.addEventListener('resize',resizeCanvas);
+    function startDraw(x,y){drawing=true;ctx.strokeStyle=currentColor;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x,y);}
+    function moveDraw(x,y){if(!drawing)return;ctx.lineTo(x,y);ctx.stroke();}
+    function endDraw(){drawing=false;}
+    canvas.addEventListener('mousedown',e=>{const r=canvas.getBoundingClientRect();startDraw(e.clientX-r.left,e.clientY-r.top);});
+    canvas.addEventListener('mousemove',e=>{const r=canvas.getBoundingClientRect();moveDraw(e.clientX-r.left,e.clientY-r.top);});
+    canvas.addEventListener('mouseup',endDraw);
+    canvas.addEventListener('mouseleave',endDraw);
+    canvas.addEventListener('touchstart',e=>{e.preventDefault();const r=canvas.getBoundingClientRect();const t=e.touches[0];startDraw(t.clientX-r.left,t.clientY-r.top);});
+    canvas.addEventListener('touchmove',e=>{e.preventDefault();const r=canvas.getBoundingClientRect();const t=e.touches[0];moveDraw(t.clientX-r.left,t.clientY-r.top);});
+    canvas.addEventListener('touchend',endDraw);
+    canvas.addEventListener('touchcancel',endDraw);
+    const palette=['#000000','#7f7f7f','#880000','#ff0000','#aaff00','#00ff00','#00ffff','#0000ff','#ff00ff','#ffff00','#ffffff','#c0c0c0','#804000','#ff8000','#008080','#800080','#008000','#808000','#404040','#ff8080'];palette.forEach(col=>{const swatch=document.createElement('div');swatch.className='nsiPaint-color';swatch.style.backgroundColor=col;swatch.addEventListener('click',()=>{currentColor=col;});colorsContainer.appendChild(swatch);});
+    // ----- Contact window -----
+    const contact98Window=document.getElementById('contact98Window'),contact98Titlebar=document.getElementById('contact98Titlebar');
+    function openContact98Window(){contact98Window.style.display='block';const rect=contact98Window.getBoundingClientRect();contact98Window.style.left=`${window.innerWidth/2-rect.width/2}px`;contact98Window.style.top=`${window.innerHeight/2-rect.height/2}px`;contact98Window.style.transform='none';bringToFront(contact98Window);clampToViewport(contact98Window);}
+    function closeContact98Window(){contact98Window.style.display='none';}
+    let contact98OffsetX,contact98OffsetY,contact98IsDragging=false;
+    contact98Titlebar.addEventListener('mousedown',e=>{contact98IsDragging=true;const rect=contact98Window.getBoundingClientRect();contact98OffsetX=e.clientX-rect.left;contact98OffsetY=e.clientY-rect.top;contact98Window.style.transform='none';bringToFront(contact98Window);e.preventDefault();});
+    document.addEventListener('mouseup',()=>contact98IsDragging=false);
+    document.addEventListener('mousemove',e=>{if(contact98IsDragging){contact98Window.style.left=`${e.clientX-contact98OffsetX}px`;contact98Window.style.top=`${e.clientY-contact98OffsetY}px`;clampToViewport(contact98Window);}});
+    contact98Titlebar.addEventListener('touchstart',e=>{contact98IsDragging=true;const touch=e.touches[0];const rect=contact98Window.getBoundingClientRect();contact98OffsetX=touch.clientX-rect.left;contact98OffsetY=touch.clientY-rect.top;contact98Window.style.transform='none';bringToFront(contact98Window);});
+    document.addEventListener('touchend',()=>contact98IsDragging=false);
+    document.addEventListener('touchmove',e=>{if(contact98IsDragging){const touch=e.touches[0];contact98Window.style.left=`${touch.clientX-contact98OffsetX}px`;contact98Window.style.top=`${touch.clientY-contact98OffsetY}px`;clampToViewport(contact98Window);}});
+  </script>
+</body>
+</html>
