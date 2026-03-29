@@ -1,80 +1,342 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Word Mark Screensaver</title>
-    <style>
-        body {
-            margin: 0;
-            background-color: #000;
-            overflow: hidden;
-        }
-        img#logo {
-            position: absolute;
-            top: 0;
-            left: 0;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Suddenly a Whale | Marketing Strategy & Social Growth</title>
+  <style>
+    :root {
+      --bg: #070b16;
+      --text: #ecf2ff;
+      --accent: #7ca6ff;
+      --accent-soft: rgba(124, 166, 255, 0.28);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, Avenir, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 30% 20%, rgba(124, 166, 255, 0.2), transparent 45%),
+        radial-gradient(circle at 75% 75%, rgba(80, 115, 220, 0.2), transparent 40%),
+        linear-gradient(160deg, #090f20 0%, #060913 52%, #05070d 100%);
+      overflow: hidden;
+    }
+
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      width: 100%;
+      display: grid;
+      place-items: center;
+      isolation: isolate;
+    }
+
+    #scene {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+    }
+
+    .overlay {
+      position: relative;
+      z-index: 2;
+      width: min(1040px, 90vw);
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      gap: 1.4rem;
+    }
+
+    .title {
+      margin: 0;
+      font-size: clamp(2rem, 5vw, 4.4rem);
+      line-height: 0.95;
+      letter-spacing: -0.02em;
+      text-wrap: balance;
+      max-width: 13ch;
+      text-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .tagline {
+      margin: 0;
+      max-width: 44ch;
+      font-size: clamp(1rem, 1.4vw, 1.2rem);
+      color: rgba(236, 242, 255, 0.82);
+      line-height: 1.55;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      width: fit-content;
+      margin-bottom: 0.4rem;
+      padding: 0.36rem 0.7rem;
+      border-radius: 999px;
+      border: 1px solid rgba(236, 242, 255, 0.2);
+      background: rgba(5, 9, 19, 0.55);
+      backdrop-filter: blur(3px);
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(236, 242, 255, 0.86);
+    }
+
+    .kinetic-ring {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: min(76vmin, 720px);
+      aspect-ratio: 1;
+      transform: translate(-50%, -50%);
+      z-index: 2;
+      pointer-events: none;
+      opacity: 0.9;
+      filter: drop-shadow(0 0 22px rgba(124, 166, 255, 0.18));
+    }
+
+    .ring-track {
+      transform-origin: 50% 50%;
+      animation: spin 18s linear infinite;
+    }
+
+    .ring-track.reverse {
+      animation-direction: reverse;
+      animation-duration: 24s;
+    }
+
+    .ring-text {
+      fill: rgba(236, 242, 255, 0.94);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      font-weight: 700;
+      font-size: 24px;
+    }
+
+    .ring-text.small {
+      font-size: 13px;
+      fill: rgba(236, 242, 255, 0.75);
+      letter-spacing: 0.32em;
+      font-weight: 600;
+    }
+
+    .footer-note {
+      position: absolute;
+      left: 50%;
+      bottom: 1.6rem;
+      transform: translateX(-50%);
+      z-index: 3;
+      font-size: 0.8rem;
+      letter-spacing: 0.11em;
+      text-transform: uppercase;
+      color: rgba(236, 242, 255, 0.56);
+      pointer-events: none;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 760px) {
+      .overlay {
+        align-self: end;
+        padding-bottom: 14svh;
+      }
+
+      .kinetic-ring {
+        width: 92vmin;
+      }
+
+      .ring-text { font-size: 16px; }
+      .ring-text.small { font-size: 10px; }
+    }
+  </style>
 </head>
 <body>
-    <img id="logo" src="" alt="Word Mark">
-    <script>
-        (function() {
-            const images = [
-                "https://nosingleindividual.com/wp-content/uploads/2025/06/flamingo-Word-Mark.png",
-                "https://nosingleindividual.com/wp-content/uploads/2025/06/Lavender-Word-Mark.png",
-                "https://nosingleindividual.com/wp-content/uploads/2025/06/Lime-Word-Mark.png",
-                "https://nosingleindividual.com/wp-content/uploads/2025/06/raspberry-Word-Mark.png"
-            ];
-            let current = 0;
-            const img = document.getElementById('logo');
-            img.src = images[current];
+  <main class="hero">
+    <div id="scene" aria-hidden="true"></div>
 
-            // starting position in the center
-            let x = (window.innerWidth - img.width) / 2;
-            let y = (window.innerHeight - img.height) / 2;
+    <svg class="kinetic-ring" viewBox="0 0 1000 1000" aria-hidden="true">
+      <defs>
+        <path id="outerRing" d="M 500,500 m -330,0 a 330,330 0 1,1 660,0 a 330,330 0 1,1 -660,0" />
+        <path id="innerRing" d="M 500,500 m -248,0 a 248,248 0 1,0 496,0 a 248,248 0 1,0 -496,0" />
+      </defs>
+      <g class="ring-track">
+        <text class="ring-text">
+          <textPath href="#outerRing" startOffset="0%">
+            DIGITAL MARKETING • ORGANIC SOCIAL • CONTENT CREATION • PAID SOCIAL • PITCH SUPPORT • BRAND STRATEGY •
+          </textPath>
+        </text>
+      </g>
+      <g class="ring-track reverse">
+        <text class="ring-text small">
+          <textPath href="#innerRing" startOffset="0%">
+            SUDDENLY A WHALE • TELL A BIGGER STORY • STRATEGY + CREATIVE + EXECUTION •
+          </textPath>
+        </text>
+      </g>
+    </svg>
 
-            // movement speed (pixels per frame)
-            let dx = 2;
-            let dy = 2;
+    <section class="overlay">
+      <span class="badge">SUDDENLY A WHALE</span>
+      <h1 class="title">Make your brand impossible to ignore.</h1>
+      <p class="tagline">
+        Marketing strategy and social systems built to turn ideas into momentum — from pitch support and platform growth
+        to end-to-end content and paid social execution.
+      </p>
+    </section>
 
-            function changeImage() {
-                const prev = current;
-                // Choose next image sequentially
-                current = (current + 1) % images.length;
-                img.src = images[current];
-            }
+    <p class="footer-note">Move your cursor to steer the whale</p>
+  </main>
 
-            function move() {
-                x += dx;
-                y += dy;
+  <script type="module">
+    import * as THREE from 'https://unpkg.com/three@0.164.1/build/three.module.js';
 
-                // Check horizontal bounds
-                if (x <= 0 || x + img.width >= window.innerWidth) {
-                    dx *= -1;
-                    changeImage();
-                }
-                // Check vertical bounds
-                if (y <= 0 || y + img.height >= window.innerHeight) {
-                    dy *= -1;
-                    changeImage();
-                }
+    const sceneEl = document.getElementById('scene');
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.Fog(0x070b16, 8, 17);
 
-                img.style.left = x + 'px';
-                img.style.top = y + 'px';
-                requestAnimationFrame(move);
-            }
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.set(0, 0.35, 5.1);
 
-            // ensure the image has loaded to get dimensions
-            img.onload = function() {
-                x = (window.innerWidth - img.width) / 2;
-                y = (window.innerHeight - img.height) / 2;
-                img.style.left = x + 'px';
-                img.style.top = y + 'px';
-                requestAnimationFrame(move);
-            };
-        })();
-    </script>
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    sceneEl.appendChild(renderer.domElement);
+
+    const whaleGroup = new THREE.Group();
+    scene.add(whaleGroup);
+
+    const bodyShape = new THREE.Shape();
+    bodyShape.moveTo(-2.2, 0.05);
+    bodyShape.bezierCurveTo(-1.8, 0.7, -0.8, 0.95, 0.4, 0.68);
+    bodyShape.bezierCurveTo(1.6, 0.35, 2.35, -0.5, 2.3, -1.3);
+    bodyShape.bezierCurveTo(2.2, -2.35, 1.1, -2.9, -0.2, -2.9);
+    bodyShape.bezierCurveTo(-1.7, -2.84, -2.45, -1.75, -2.34, -0.74);
+    bodyShape.bezierCurveTo(-2.3, -0.28, -2.28, -0.08, -2.2, 0.05);
+
+    const extrudeConfig = {
+      depth: 0.85,
+      steps: 1,
+      bevelEnabled: true,
+      bevelSegments: 1,
+      bevelSize: 0.14,
+      bevelThickness: 0.14
+    };
+
+    const bodyGeo = new THREE.ExtrudeGeometry(bodyShape, extrudeConfig);
+    bodyGeo.scale(0.8, 0.8, 0.7);
+    bodyGeo.center();
+
+    const flipperGeo = new THREE.BufferGeometry();
+    const flipperVerts = new Float32Array([
+      0.0, 0.0, 0.0,
+      0.7, -0.18, 0.15,
+      0.18, -0.72, 0.07,
+      0.0, 0.0, 0.0,
+      0.18, -0.72, 0.07,
+      -0.24, -0.38, -0.12
+    ]);
+    flipperGeo.setAttribute('position', new THREE.BufferAttribute(flipperVerts, 3));
+    flipperGeo.computeVertexNormals();
+
+    const tailGeo = new THREE.BufferGeometry();
+    const tailVerts = new Float32Array([
+      0, 0, 0,
+      0.95, 0.25, -0.05,
+      0.65, 0.04, 0.3,
+      0, 0, 0,
+      -0.95, 0.25, -0.05,
+      -0.65, 0.04, 0.3
+    ]);
+    tailGeo.setAttribute('position', new THREE.BufferAttribute(tailVerts, 3));
+    tailGeo.computeVertexNormals();
+
+    const whaleMat = new THREE.MeshStandardMaterial({
+      color: 0x2f3f6f,
+      roughness: 0.72,
+      metalness: 0.14,
+      flatShading: true
+    });
+
+    const underbellyMat = new THREE.MeshStandardMaterial({
+      color: 0x9eb8dd,
+      roughness: 0.78,
+      metalness: 0.03,
+      flatShading: true
+    });
+
+    const body = new THREE.Mesh(bodyGeo, whaleMat);
+    whaleGroup.add(body);
+
+    const underside = new THREE.Mesh(bodyGeo.clone(), underbellyMat);
+    underside.scale.set(0.93, 0.45, 0.86);
+    underside.position.y = -0.36;
+    underside.position.z = 0.05;
+    whaleGroup.add(underside);
+
+    const flipperLeft = new THREE.Mesh(flipperGeo, whaleMat);
+    flipperLeft.position.set(0.2, -0.38, 0.38);
+    flipperLeft.rotation.set(0.28, 0.1, -0.18);
+    whaleGroup.add(flipperLeft);
+
+    const flipperRight = flipperLeft.clone();
+    flipperRight.scale.z = -1;
+    flipperRight.position.z = -0.35;
+    whaleGroup.add(flipperRight);
+
+    const tail = new THREE.Mesh(tailGeo, whaleMat);
+    tail.position.set(2.02, 0.06, 0.0);
+    tail.rotation.set(0.0, 0.1, 0.0);
+    whaleGroup.add(tail);
+
+    whaleGroup.rotation.set(-0.22, -0.92, -0.13);
+    whaleGroup.position.set(0.34, -0.08, 0);
+    whaleGroup.scale.set(0.96, 0.96, 0.96);
+
+    const keyLight = new THREE.DirectionalLight(0xd7e4ff, 1.4);
+    keyLight.position.set(-2.2, 1.9, 3.2);
+    scene.add(keyLight);
+
+    const rimLight = new THREE.DirectionalLight(0x83a8ff, 1.1);
+    rimLight.position.set(3, 0.6, -2.5);
+    scene.add(rimLight);
+
+    scene.add(new THREE.AmbientLight(0x3d4f78, 0.92));
+
+    const mouse = { x: 0, y: 0 };
+    window.addEventListener('pointermove', (event) => {
+      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = (event.clientY / window.innerHeight) * 2 - 1;
+    });
+
+    const clock = new THREE.Clock();
+
+    function animate() {
+      const t = clock.getElapsedTime();
+      whaleGroup.position.y = -0.08 + Math.sin(t * 1.15) * 0.08;
+      whaleGroup.rotation.z = -0.13 + Math.sin(t * 0.9) * 0.06 + mouse.x * 0.08;
+      whaleGroup.rotation.x = -0.22 + mouse.y * 0.14;
+      whaleGroup.rotation.y += ((-0.92 + mouse.x * 0.22) - whaleGroup.rotation.y) * 0.055;
+
+      tail.rotation.z = Math.sin(t * 2.5) * 0.25;
+      flipperLeft.rotation.y = 0.1 + Math.sin(t * 2.2) * 0.06;
+      flipperRight.rotation.y = -0.1 - Math.sin(t * 2.2) * 0.06;
+
+      renderer.render(scene, camera);
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
 </body>
 </html>
